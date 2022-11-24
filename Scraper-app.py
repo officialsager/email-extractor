@@ -39,6 +39,29 @@ def fetch_query(query):
     return r.text
 
 
+# Beautifucation
+
+  # custom_title = """
+  # <div style="font-size:60px;font-weight:bolder;background-color:#fff;padding:10px;
+  # border-radius:10px;border:5px solid #464e5f;text-align:center;">
+  #        <span style='color:blue'>E</span>
+  #        <span style='color:black'>m</span>
+  #        <span style='color:red'>a</span>
+  #        <span style='color:green'>i</span>
+  #        <span style='color:purple'>l</span>
+  #
+  #        <span style='color:blue'>E</span>
+  #        <span style='color:red'>x</span>
+  #        <span style='color:yellow'>t</span>
+  #        <span style='color:#464e5f'>r</span>
+  #        <span style='color:red'>a</span>
+  #        <span style='color:green'>c</span>
+  #        <span style='color:yellow'>t</span>
+  #        <span style='color:black'>o</span>
+  #        <span style='color:blue'>r</span>
+  #
+  # </div>
+  # """
 
 def main():
     """Email Extraction Streamlit App"""
@@ -46,7 +69,7 @@ def main():
 
     # stc.html(custom_title)
 
-    menu = ["Home","Single Extractor","Bulk Extractor","About"]
+    menu = ["Home","Single Extractor","About"]
     choice = st.sidebar.selectbox("Menu",menu)
 
     if choice == "Home":
@@ -55,11 +78,11 @@ def main():
         email_extensions_list = ["gmail.com","yahoo.com","hotmail.com","aol.com","icloud.com","hotmail.co.uk","hotmail.fr","msn.com","yahoo.fr","wanadoo.fr","orange.fr","comcast.net","yahoo.co.uk","yahoo.com.br","yahoo.co.in","live.com","rediffmail.com","free.fr","gmx.de","web.de","yandex.ru","ymail.com","libero.it","outlook.com","uol.com.br","bol.com.br","mail.ru","cox.net","hotmail.it","sbcglobal.net","sfr.fr","live.fr","verizon.net","live.co.uk","googlemail.com","yahoo.es","ig.com.br","live.nl","bigpond.com","terra.com.br","yahoo.it","neuf.fr","yahoo.de","alice.it","rocketmail.com","att.net","laposte.net","bellsouth.net","yahoo.in","hotmail.es","charter.net","yahoo.ca","yahoo.com.au","rambler.ru","hotmail.de","tiscali.it","shaw.ca","yahoo.co.jp","sky.com","earthlink.net","optonline.net","freenet.de","t-online.de","aliceadsl.fr","virgilio.it","home.nl","qq.com","telenet.be","me.com","yahoo.com.ar","tiscali.co.uk","yahoo.com.mx","voila.fr","gmx.net","mail.com","planet.nl","tin.it","live.it","ntlworld.com","arcor.de","yahoo.co.id","frontiernet.net","hetnet.nl","live.com.au","yahoo.com.sg","zonnet.nl","club-internet.fr","juno.com","optusnet.com.au","blueyonder.co.uk","bluewin.ch","skynet.be","sympatico.ca","windstream.net","mac.com","centurytel.net","chello.nl","live.ca","aim.com","bigpond.com.au","titan.com"]
         country_name = st.sidebar.selectbox("Country",countries_list)
         email_type = st.sidebar.selectbox("Email Type",email_extensions_list)
-        tasks_list = ["Emails","URLS","Phonenumbers"]
+        tasks_list = ["Emails","URLS",""]
         task_option = st.sidebar.multiselect("Task",tasks_list,default="Emails")
-        search_text = st.text_input("Type Term Here")
+        search_text = st.text_input("Paste Term Here")
         # dentist + USA + email@aol.com
-        generated_query = f"{search_text} + {country_name} + email@{email_type} + site:linkedin.com/in&num=100"
+        generated_query = f"{search_text} + {country_name} + email@{email_type} + site:linkedin.com/in&num=200"
         st.info("Generated Query: {}".format(generated_query))
 
         if st.button("Search & Extract"):
@@ -86,13 +109,13 @@ def main():
     elif choice == "Single Extractor":
         st.subheader("Extract A Single Term")
         text = st.text_area("Paste Text Here")
-        task_option = st.sidebar.selectbox("Task",["Emails","URLS","Phonenumbers"])
+        task_option = st.sidebar.selectbox("Task",["Emails","URLS",""])
         if st.button("Extract"):
 
             if task_option == "URLS":
                 results = nfx.extract_urls(text)
-            elif task_option == "Phonenumbers":
-                results = nfx.extract_phone_numbers(text)
+            # elif task_option == "Phonenumbers":
+            #     results = nfx.extract_phone_numbers(text)
             else:
                 results = nfx.extract_emails(text)
 
@@ -104,26 +127,26 @@ def main():
                 make_downloadable(results_df,task_option)
 
 
-    elif choice == "Bulk Extractor":
-        st.subheader("Bulk Extractor")
-        text = st.text_area("Paste Text Here")
-        tasks_list = ["Emails","URLS","Phonenumbers"]
-        task_option = st.sidebar.multiselect("Task",tasks_list,default="Emails")
-        task_mapper = {"Emails":nfx.extract_emails(text),"URLS":nfx.extract_urls(text),
-                       "Phonenumbers":nfx.extract_phone_numbers(text)}
+#     elif choice == "Bulk Extractor":
+#         st.subheader("Bulk Extractor")
+#         text = st.text_area("Paste Text Here")
+#         tasks_list = ["Emails","URLS",""]
+#         task_option = st.sidebar.multiselect("Task",tasks_list,default="Emails")
+#         task_mapper = {"Emails":nfx.extract_emails(text),"URLS":nfx.extract_urls(text),
+#                        "Phonenumbers":nfx.extract_phone_numbers(text)}
 
-        all_results = []
-        for task in task_option:
-            results =task_mapper[task]
-            # st.write(results)
-            all_results.append(results)
-        st.write(all_results)
+#         all_results = []
+#         for task in task_option:
+#             results =task_mapper[task]
+#             # st.write(results)
+#             all_results.append(results)
+#         st.write(all_results)
 
-        with st.beta_expander("Results As DataFrame"):
-            results_df = pd.DataFrame(all_results).T
-            results_df.columns = task_option
-            st.dataframe(results_df)
-            make_downloadable_df(results_df)
+#         with st.beta_expander("Results As DataFrame"):
+#             results_df = pd.DataFrame(all_results).T
+#             results_df.columns = task_option
+#             st.dataframe(results_df)
+#             make_downloadable_df(results_df)
     else:
         st.subheader("About")
 
